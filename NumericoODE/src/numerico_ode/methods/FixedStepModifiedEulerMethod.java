@@ -1,31 +1,23 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package numerico_ode.methods;
+import java.util.stream.IntStream;
 
 import numerico_ode.ode.InitialValueProblem;
 
-/**
- * Fixed Step Euler Method
- * 
- * @author F. Esquembre
- * @version September 2020
- */
-public class FixedStepEulerMethod extends FixedStepMethod {
+public class FixedStepModifiedEulerMethod extends FixedStepMethod{
     
     /**
      * Initializes the method for a given InitialValueProblem
      * @param InitialValueProblem problem 
      * @param step the fixed step to take. If negative, we'd solve backwards in time
      */
-    public FixedStepEulerMethod(InitialValueProblem problem, double step) {
+    public FixedStepModifiedEulerMethod(InitialValueProblem problem, double step) {
         super(problem,step);
     }
 
+    
+    @Override
     /**
-     * Euler method implementation
+     * Euler method implementation modified to do 2 evaluations
      * @param deltaTime the step to take
      * @param time the current time
      * @param state the current state
@@ -33,9 +25,14 @@ public class FixedStepEulerMethod extends FixedStepMethod {
      */
     protected double doStep(double deltaTime, double time, double[] state) {
         double[] derivative = mProblem.getDerivative(time, state);
-        super.addToEvaluationCounter(1);
+        double[] state2 = new double[state.length];
+        // We use Streams, from Java 8 and above, to do the vectorial operation
+        // since we need state + 1/2 k1 to do k2.
+        IntStream.range(0, state.length).forEach(i-> state2[i] = state[i]+ deltaTime*derivative[i]);
+        double[] derivative2 = mProblem.getDerivative(time + deltaTime, state2);
+        super.addToEvaluationCounter(2);
         for (int i=0; i<state.length; i++) {
-            state[i] = state[i] + deltaTime * derivative[i];	
+            state[i] = state[i] + (deltaTime/2.) * (derivative[i]+derivative2[i]);	
         }
         return time+deltaTime;
     }
