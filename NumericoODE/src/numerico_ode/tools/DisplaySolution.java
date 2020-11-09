@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import numerico_ode.ode.NumericalSolution;
 import numerico_ode.ode.NumericalSolutionPoint;
 import numerico_ode.interpolation.StateFunction;
+import org.opensourcephysics.display.Dataset;
 
 /**
  *
@@ -24,15 +25,46 @@ public class DisplaySolution {
     static public void listError(NumericalSolution solution, 
                                  StateFunction trueSolution,
                                  int[] indexes) {
-        Iterator<NumericalSolutionPoint> iterator = solution.iterator();
+        listIterator(solution.iterator(),trueSolution, indexes);
+    }
+    
+    static public void listError(NumericalSolution solution, 
+                                 StateFunction trueSolution,
+                                 int[] indexes, int numberOfPoints) {
+        listIterator(solution.iterator(numberOfPoints),trueSolution, indexes);
+    }
+
+    static public double maximumError(NumericalSolution solution, 
+                                    StateFunction trueSolution,
+                                    int[] indexes) {
+        return maximumError(solution.iterator(),trueSolution, indexes);
+    }
+    
+    static private double maximumError(Iterator<NumericalSolutionPoint> iterator, StateFunction trueSolution, int[] indexes) {
+        double maxError = 0.0;
+        while (iterator.hasNext()) {
+            NumericalSolutionPoint point = iterator.next();
+            double[] trueState = trueSolution.getState(point.getTime());
+            double error = 0;
+            for (int i=0; i<indexes.length;i++) {
+                error += Math.abs(point.getState(indexes[i])-trueState[indexes[i]]);
+                maxError = Math.max(maxError, Math.abs(error));
+            }
+        }
+        return maxError;
+    }
+
+    static private void listIterator(Iterator<NumericalSolutionPoint> iterator, StateFunction trueSolution, int[] indexes) {
+        double maxError = 0.0;
         while (iterator.hasNext()) {
             NumericalSolutionPoint point = iterator.next();
             double[] trueState = trueSolution.getState(point.getTime());
             System.out.print("time="+point.getTime());
             double error = 0;
             for (int i=0; i<indexes.length;i++) {
-                System.out.print("x["+indexes[i]+"]="+point.getState(indexes[i])+", vs "+trueState[indexes[i]]);
+                System.out.print(", x["+indexes[i]+"]="+point.getState(indexes[i])+", vs "+trueState[indexes[i]]);
                 error += Math.abs(point.getState(indexes[i])-trueState[indexes[i]]);
+                maxError = Math.max(maxError, Math.abs(error));
             }
             System.out.println(", error = "+error);
         }
@@ -49,26 +81,38 @@ public class DisplaySolution {
             System.out.println();
         }
     }
+    
+    
 
     static public void timePlot(NumericalSolution solution) {
+        timePlot(solution, 0);
+    }
+    
+    static public void timePlot(NumericalSolution solution, int skip) {
         int dimension = solution.getFirstPoint().getState().length;
         int[] indexes = new int[dimension];
         for (int i=0; i<dimension; i++) indexes[i] = i;
-        timePlot(solution, indexes);
+        timePlot(solution, indexes,skip);
     }
     
     static public void timePlot(NumericalSolution solution, int[] indexes) {
+        timePlot(solution, indexes, 0);
+    }
+    
+    static public void timePlot(NumericalSolution solution, int[] indexes, int skip) {
         PlotFrame frame = new PlotFrame ("time" , "x[*]" , "Time plot frame") ;
         frame.setConnected(true); // sets default to connect dataset points
         frame.setSize(800,600);
         for (int i=0; i<indexes.length;i++) {
-            //frame.setMarkerShape(i, Dataset.NO_MARKER);
+            int index=0;
+            frame.setMarkerShape(i, Dataset.NO_MARKER);
             //frame.setMarkerColor(0,java.awt.Color.RED);
             frame.setXYColumnNames (i , "time" ,"x["+i+"]") ; // sets names for each dataset
             Iterator<NumericalSolutionPoint> iterator = solution.iterator();
             while (iterator.hasNext()) {
                 NumericalSolutionPoint point = iterator.next();
-                frame.append(i, point.getTime(), point.getState(indexes[i]));
+                index++;
+                if (skip==0 || index%skip == 0) frame.append(i, point.getTime(), point.getState(indexes[i]));
             }
         }
         frame.setVisible ( true ) ;
@@ -76,14 +120,25 @@ public class DisplaySolution {
     }
     
     static public void statePlot(NumericalSolution solution, int index1, int index2) {
+        statePlot(solution, index1, index2, 0);
+    }
+    
+    static public void statePlot(NumericalSolution solution, int index1, int index2, int skip) {
         PlotFrame frame = new PlotFrame ("x["+index1+"]" , "x["+index2+"]"  , "State plot frame") ;
         frame.setConnected(true); // sets default to connect dataset points
         frame.setSize(800,600);
+        frame.setMarkerShape(0, Dataset.NO_MARKER);
         frame.setMarkerColor(0,java.awt.Color.BLUE);
         frame.setXYColumnNames (0 , "x["+index1+"]" , "x["+index2+"]") ; // sets names for each dataset
         Iterator<NumericalSolutionPoint> iterator = solution.iterator();
+        int index=0;
+        NumericalSolutionPoint point=null;
         while (iterator.hasNext()) {
-            NumericalSolutionPoint point = iterator.next();
+            point = iterator.next();
+            if (skip==0 || index%skip == 0) frame.append(0, point.getState(index1), point.getState(index2));
+            index++;
+        }
+        if (skip!=0 && index%skip != 0 && point!=null) {
             frame.append(0, point.getState(index1), point.getState(index2));
         }
         frame.setVisible ( true ) ;

@@ -17,7 +17,14 @@ import java.util.Iterator;
  */
 public class NumericalSolution {
     private ArrayList<NumericalSolutionPoint> mPointList;
-    
+   
+    /**
+     * Creates an empty NumericalSolution
+     * @param problem the InitialValueProblem being solved
+     */
+    public NumericalSolution() {
+        mPointList = new ArrayList<>();
+    }
     /**
      * Creates a NumericalSolution with the initial condition as first point
      * @param problem the InitialValueProblem being solved
@@ -68,6 +75,12 @@ public class NumericalSolution {
         return mPointList.get(mPointList.size()-1);
     }
     
+    public double getFirstStep() {
+        if (mPointList.size()<=1) return Double.NaN;
+        NumericalSolutionPoint secondPoint = mPointList.get(1);
+        return secondPoint.getTime()-getInitialTime();
+    }
+    
     /**
      * Returns an iterator to iterate through the whole list of points in the solution
      * @return 
@@ -75,4 +88,15 @@ public class NumericalSolution {
     public Iterator<NumericalSolutionPoint> iterator() {
         return mPointList.iterator();
     }
+    
+    /**
+     * Returns an iterator to iterate through the last few points in the solution
+     * @param numberOfPoints int, number of points at the end
+     * @return 
+     */
+    public Iterator<NumericalSolutionPoint> iterator(int numberOfPoints) {
+        int size = mPointList.size();
+        return mPointList.subList(size-numberOfPoints, size).iterator();
+    }
+    
 }

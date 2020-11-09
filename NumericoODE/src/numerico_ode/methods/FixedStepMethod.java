@@ -51,6 +51,7 @@ abstract public class FixedStepMethod {
         double time = lastPoint.getTime();
         double[] state = lastPoint.getState();
         time = doStep(mStep,time,state);
+        if (Double.isNaN(time)) return null;
         return mSolution.add(time, state);
     }
     
@@ -66,12 +67,14 @@ abstract public class FixedStepMethod {
         if (mStep>0) {
             while (time<finalTime) {
                 time = doStep(mStep,time,state);
+                if (Double.isNaN(time)) return Double.NaN;
                 mSolution.add(time, state);
             }
         } 
         else if (mStep<0) {
             while (time>finalTime) {
                 time = doStep(mStep,time,state);
+                if (Double.isNaN(time)) return Double.NaN;
                 mSolution.add(time, state);
             }
         } // does nothing if mStep = 0
