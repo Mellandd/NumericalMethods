@@ -1,7 +1,7 @@
 package numerico_ode.problems;
 
-import numerico_ode.methods.FixedStepMethod;
-import numerico_ode.methods.FixedStepRungeKuttaOrder4Method;
+import numerico_ode.methods.AdaptativeStepMethod;
+import numerico_ode.methods.AdaptativeStepRKF45Method;
 import numerico_ode.ode.InitialValueProblem;
 import numerico_ode.tools.DisplaySolution;
 
@@ -27,17 +27,15 @@ public class Arenstorf implements InitialValueProblem{
         return new double[] { x[1], 
         		x[0]+2*x[3]-eMass*(x[0]+mMass)/d1-mMass*(x[0]-eMass)/d2, 
                 x[3], 
-        		x[0]-2*x[1]-eMass*(x[2])/d1-mMass*(x[2])/d2
+        		x[2]-2*x[1]-eMass*(x[2])/d1-mMass*(x[2])/d2
         };
 	}
 	
 	public static void main(String[] args) {
-		InitialValueProblem problem = new TwoBodyProblem();
-		FixedStepMethod method = new FixedStepRungeKuttaOrder4Method(problem, 0.00005);
-		double[] a = problem.getDerivative(0, problem.getInitialState());
-        System.out.println(a[0] + " " + a[1] + " " + a[2] + " " + a[3]);
-		method.solve(341304);
-        DisplaySolution.statePlot(method.getSolution(), 0, 2,150);
+		InitialValueProblem problem = new Arenstorf();
+		AdaptativeStepMethod method = new AdaptativeStepRKF45Method(problem, 0.00005,1e-8,1,1e-50);
+		method.solve(18);
+        DisplaySolution.statePlot(method.getSolution(), 0, 2,100);
 	}
 
 }
