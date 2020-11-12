@@ -31,7 +31,7 @@ public class FixedStepEulerMethod extends FixedStepMethod {
      * @param state the current state
      * @return the value of time of the step taken, state will contain the updated state
      */
-    protected double doStep(double deltaTime, double time, double[] state) {
+    public double doStep(double deltaTime, double time, double[] state) {
         double[] derivative = mProblem.getDerivative(time, state);
         super.addToEvaluationCounter(1);
         for (int i=0; i<state.length; i++) {

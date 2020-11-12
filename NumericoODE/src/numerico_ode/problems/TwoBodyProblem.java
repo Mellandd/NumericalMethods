@@ -37,6 +37,10 @@ public class TwoBodyProblem implements InitialValueProblem{
 		FixedStepMethod method2 = new FixedStepEulerMethod(problem, 1);
 		FixedStepMethod method3 = new FixedStepModifiedEulerMethod(problem, 1);
 		
+		AdaptativeStepMethod method4 = new AdaptativeStepRK4Method(problem, 1, 1e-5, 1, 1e-20);
+		method4.solve(9000);
+		DisplaySolution.statePlot(method4.getSolution(), 0, 2);
+		
         NumericalSolutionPoint previousPoint, currentPoint;
         
         //Obtenemos las órbitas para euler y euler modificado.

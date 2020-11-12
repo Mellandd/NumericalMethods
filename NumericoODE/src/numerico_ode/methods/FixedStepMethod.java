@@ -27,7 +27,7 @@ abstract public class FixedStepMethod {
      * @param InitialValueProblem problem 
      * @param step the fixed step to take. If negative, we'd solve backwards in time
      */
-    protected FixedStepMethod(InitialValueProblem problem, double step) {
+    public FixedStepMethod(InitialValueProblem problem, double step) {
         mProblem = problem;
         mStep = step;
         mSolution = new NumericalSolution(problem);
@@ -40,7 +40,7 @@ abstract public class FixedStepMethod {
      * @param state the current state
      * @return the value of time of the step taken, state will contain the updated state
      */
-    abstract protected double doStep(double deltaTime, double time, double[] state);
+    abstract public double doStep(double deltaTime, double time, double[] state);
     
     /**
      * Steps the problem once
